@@ -1,0 +1,15 @@
+PREFIX : <http://domain.org/ns/>
+
+SELECT * WHERE {
+  {
+    # Mencari jumlah anggota untuk semuanya
+    SELECT ?band ?namaBand (COUNT(?anggota) AS ?anggotaCount) WHERE {
+      ?band a :Band .
+      ?band :member ?anggota .
+      ?band :name ?namaBand .
+    }
+    GROUP BY ?band ?namaBand
+  }
+  #  Filter untuk anggotanya >= 5 saja
+  FILTER (?anggotaCount >= 5)
+}

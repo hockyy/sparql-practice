@@ -1,0 +1,12 @@
+PREFIX : <http://domain.org/ns/>
+
+SELECT * WHERE {
+  # Mencari band dan solo artis membernya
+  ?band a :Band .
+  ?band :member ?soloArtis .
+  ?band :name ?namaBand .
+  ?soloArtis a :SoloArtist .
+  ?soloArtis :name ?namaSoloArtis .
+}
+ORDER BY ?namaBand ?namaSoloArtis
+  # Urutkan berdasarkan nama band, kemudian nama solo artis

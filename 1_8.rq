@@ -1,0 +1,46 @@
+PREFIX : <http://domain.org/ns/>
+
+SELECT ?judulAlbum ?judulLagu ?namaArtis ?panjangLagu ?paraPenulis WHERE {
+  ?album :artist ?artis .
+  ?album :name ?judulAlbum .
+  ?artis :name ?namaArtis .
+  {
+    # Mencari semua data lagu dengan panjang dan concat dari penulisnya
+    SELECT ?album ?lagu ?judulLagu ?panjangLagu (GROUP_CONCAT(
+                                                   ?namaPenulis;SEPARATOR=", ") AS ?paraPenulis) WHERE {
+      ?album :track ?lagu .
+      ?lagu :writer ?penulis .
+      ?penulis :name ?namaPenulis .
+      ?lagu :length ?panjangLagu .
+      ?lagu :name ?judulLagu
+    }
+    GROUP BY ?album ?lagu ?judulLagu ?panjangLagu
+  }
+  #  Melakukan filter untuk mengecek apakah tidak ada lagu yang lebih panjang dari pada dia
+  FILTER ((NOT EXISTS
+           {
+             ?album :track ?laguLain .
+             ?laguLain :length ?panjangLaguLain .
+             ?laguLain :name ?judulLaguLain .
+             FILTER (
+               ?panjangLaguLain > ?panjangLagu ||
+               (?panjangLaguLain = ?panjangLagu && ?judulLaguLain > ?judulLagu )
+             )
+           }
+          ) ||
+            #  Melakukan filter untuk mengecek apakah tidak ada lagu yang lebih pendek dari pada dia
+          (NOT EXISTS
+           {
+             ?album :track ?laguLain .
+             ?laguLain :length ?panjangLaguLain .
+             ?laguLain :name ?judulLaguLain .
+             FILTER (
+               ?panjangLaguLain < ?panjangLagu ||
+               (?panjangLaguLain = ?panjangLagu && ?judulLaguLain < ?judulLagu )
+             )
+           }
+          )
+  )
+
+}
+ORDER BY ?panjangLagu # Urut berdasarkan panjang lagu

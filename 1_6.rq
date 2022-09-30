@@ -1,0 +1,28 @@
+PREFIX : <http://domain.org/ns/>
+
+SELECT ?penulis ?banyakTulisan ?countAlbum {
+  {
+    # Mencari penulis dengan jumlah lagu terbanyak
+    SELECT ?penulis (COUNT(?lagu) as ?banyakTulisan) WHERE {
+      ?lagu a :Song .
+      ?lagu :writer ?penulis
+    }
+    GROUP BY ?penulis
+    ORDER BY DESC(?banyakTulisan) # Limit ke 10 teratas saja setelah diurutkan
+    LIMIT 10
+  }
+  {
+    # Join dengan kontribusinya terhadap album
+    SELECT (?penulis2 as ?penulis) (COUNT(?album) as ?countAlbum) WHERE {
+      {
+        SELECT DISTINCT ?penulis2 ?album WHERE {
+          ?lagulain :writer ?penulis2 .
+          ?album :track ?lagulain
+        }
+        ORDER BY ?penulis2
+      }
+    }
+    GROUP BY ?penulis2
+  }
+}
+ORDER BY DESC(?banyakTulisan)

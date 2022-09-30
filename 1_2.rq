@@ -1,0 +1,28 @@
+PREFIX : <http://domain.org/ns/>
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+
+SELECT DISTINCT ?artis ?namaArtis ?jenisArtis ?album ?namaAlbum ?tanggal WHERE {
+  ?jenisArtis rdfs:subClassOf :Artist .
+  ?artis a ?jenisArtis .
+  ?artis :name ?namaArtis
+  # Mencari artis, nama, dan jenisnya
+  # Left join dengan album dan tanggalnya, karena ada satu album
+  # yang tidak ada namanya, digunakan OPTIONAL lagi.
+  OPTIONAL {
+    ?album :artist ?artis .
+    ?album a :Album .
+    ?album :date ?tanggal .
+    OPTIONAL { ?album :name ?namaAlbum }
+  }
+  # Melakukan filter untuk memastikan bahwa tanggal album yang dimaksud adalah
+  # yang terkecil, artinya tidak ada tanggal lain yang lebih kecil, atau
+  # artisnya tidak bound
+  FILTER (
+    NOT EXISTS
+    {
+      ?album :date ?tanggalLain
+      FILTER (?tanggal > ?tanggalLain)
+    } || !BOUND(?album)
+  )
+}
+ORDER BY ?tanggal

@@ -1,0 +1,33 @@
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+
+SELECT * WHERE {
+  {
+    SELECT (?class as ?barang) ("class" as ?jenis) (COUNT(?instance) AS ?hitungBarang) WHERE {
+      {
+        SELECT DISTINCT ?class WHERE {
+          {
+            [ a ?class ]
+          } UNION {
+            [ rdfs:subClassOf ?class ]
+          } UNION {
+            ?class rdfs:subClassOf []
+          } UNION {
+            [ rdfs:domain ?class ]
+          } UNION {
+            [ rdfs:range ?class ]
+          }
+        }
+      }
+      # Simbol asterisk untuk mengecek 0 atau lebih rantai
+      ?subclass rdfs:subClassOf* ?class .
+      ?instance a ?subclass .
+    }
+    GROUP by ?class
+  } UNION {
+    SELECT (?prop as ?barang) ("property" as ?jenis) (COUNT(*) AS ?hitungBarang) WHERE {
+      # Menggunakan blank node untuk menghitung banyaknya pasangan yang cocok
+      [] ?prop []
+    }
+    GROUP BY ?prop
+  }
+}

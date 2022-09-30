@@ -1,0 +1,36 @@
+PREFIX : <http://domain.org/ns/>
+PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+
+SELECT ?penulis (COUNT(?album) as ?countAlbum) WHERE {
+  {
+    SELECT DISTINCT ?penulis ?album WHERE {
+      ?lagulain :writer ?penulis .
+      ?album :track ?lagulain
+    }
+    ORDER BY ?penulis
+  }
+} GROUP BY ?penulis
+
+
+PREFIX : <http://domain.org/ns/>
+PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+
+SELECT ?penulis ?album WHERE {
+  {
+    SELECT DISTINCT ?penulis ?album WHERE {
+      ?lagulain :writer ?penulis .
+      ?album :track ?lagulain
+    }
+    ORDER BY ?penulis
+  }
+}
+
+
+PREFIX : <http://domain.org/ns/>
+PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+SELECT * WHERE {
+               [] :member []
+ }
