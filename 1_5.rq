@@ -3,24 +3,28 @@ PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
 
 # Aggregation dengan group album artis tanggal
 SELECT DISTINCT ?album ?artis ?tanggal (COUNT(?lagu) as ?laguCount) WHERE {
-  ?artis :name ?namaArtis .
-  ?artis a :Band .
-  ?album :artist ?artis .
-  ?album a :Album .
-  ?album :producer ?produser .
-  ?album :date ?tanggal .
-  #  Mengecek semua lagu pada album ini
-  ?album :track ?lagu .
-  #  Left join dengan nama album
-  OPTIONAL { ?album :name ?namaAlbum } .
-  FILTER (?tanggal >= "1980-01-01"^^xsd:date && ?tanggal < "1990-01-01"^^xsd:date)
+  {
+    SELECT DISTINCT ?album ?artis ?tanggal ?lagu {
+      ?artis :name ?namaArtis .
+      ?artis a :Band .
+      ?album :artist ?artis .
+      ?album a :Album .
+      ?album :producer ?produser .
+      ?album :date ?tanggal .
+      #  Mengecek semua lagu pada album ini
+      ?album :track ?lagu .
+      #  Left join dengan nama album
+      OPTIONAL { ?album :name ?namaAlbum } .
+      FILTER (?tanggal >= "1980-01-01"^^xsd:date && ?tanggal < "1990-01-01"^^xsd:date)
+
+      #  Mengecek produsernya merupakan artis (band) atau membernya langsung
+      FILTER (?produser = ?artis ||
+              EXISTS { ?artis :member ?produser . }
+      )
+    }
+  }
   FILTER NOT EXISTS {
     ?album :date ?tanggalLain # Mengecek tanggal terkecil
     FILTER (?tanggal > ?tanggalLain)
   }
-  #  Mengecek produsernya merupakan artis (band) atau membernya langsung
-  FILTER (?produser = ?artis ||
-          EXISTS { ?artis :member ?produser . }
-  )
-}
-GROUP BY ?album ?artis ?tanggal
+} GROUP BY ?album ?artis ?tanggal
